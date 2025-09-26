@@ -1,0 +1,425 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>دموی سیستم اعتمادسازی | تک‌فایل</title>
+<style>
+:root{--ink:#0f3f3a;--mint:#e6fffb;--line:#e7eded;--ok:#1f7a2b;--warn:#7a6200;--info:#056b6b}
+*{box-sizing:border-box}body{margin:0;font-family:Segoe UI,Tahoma,Arial;background:#f7fafb;color:#082c2a}
+a{color:inherit;text-decoration:none}
+.header{background:#0f3f3a;color:#fff;padding:12px 16px;display:flex;gap:8px;align-items:center;justify-content:space-between}
+.header h1{margin:0;font-size:16px}
+.layout{display:grid;grid-template-columns:260px 1fr;min-height:100vh}
+.nav{background:#ffffff;border-left:1px solid var(--line);padding:12px;position:sticky;top:0;height:100vh;overflow:auto}
+.nav h3{margin:8px 0 4px 0;font-size:12px;color:#5d6b6a}
+.nav a{display:block;padding:8px 10px;border-radius:8px;margin:4px 0;border:1px solid transparent}
+.nav a.active{background:var(--mint);border-color:#bfecea}
+.sub{padding-right:14px}
+.main{padding:18px}
+.panel{background:#fff;border:1px solid var(--line);border-radius:10px;padding:14px;margin-bottom:14px;box-shadow:0 1px 3px rgba(0,0,0,.04)}
+.grid{display:grid;gap:10px}
+@media(min-width:900px){.grid2{grid-template-columns:1fr 1fr}.grid3{grid-template-columns:repeat(3,1fr)}}
+.table{width:100%;border-collapse:collapse}
+.table th,.table td{border:1px solid var(--line);padding:8px;text-align:center;font-size:13px}
+.badge{padding:3px 8px;border-radius:999px;font-size:12px;display:inline-block}
+.s-pending{background:#fff4cf;color:var(--warn)}
+.s-held{background:#cfeefd;color:var(--info)}
+.s-released{background:#dff7df;color:var(--ok)}
+.btn{border:0;border-radius:8px;padding:6px 10px;background:#0f3f3a;color:#fff;cursor:pointer}
+.btn.alt{background:#2f6f69}
+.kpi{background:#e6fffb;border:1px solid #bfecea;border-radius:10px;padding:10px}
+.meta{color:#5d6b6a;font-size:12px}
+.breadcrumb{font-size:12px;color:#5d6b6a;margin-bottom:8px}
+.input{width:100%;padding:8px;border:1px solid var(--line);border-radius:8px}
+.card{border:1px solid var(--line);border-radius:10px;padding:10px;background:#fff}
+.footer{padding:12px;text-align:center;color:#6b6b6b}
+.hidden{display:none}
+</style>
+</head>
+<body>
+<header class="header">
+  <h1>دمو | سیستم اعتمادسازی (Escrow)</h1>
+  <small class="meta">داده‌ها فیک هستند</small>
+</header>
+
+<div class="layout">
+  <aside class="nav" id="nav">
+    <h3>ناوبری</h3>
+    <a href="#/dashboard" data-route>داشبورد</a>
+    <a href="#/transactions" data-route>تراکنش‌ها</a>
+    <a href="#/orders" data-route>سفارش‌ها</a>
+    <a href="#/shipping" data-route>ارسال‌ها</a>
+    <a href="#/disputes" data-route>اختلافات</a>
+    <a href="#/buyers" data-route>پروفایل خریداران</a>
+    <a href="#/sellers" data-route>پروفایل فروشندگان</a>
+    <a href="#/kyc" data-route>احراز هویت (KYC)</a>
+    <a href="#/wallet" data-route>کیف پول و پرداخت</a>
+    <a href="#/settings" data-route>تنظیمات</a>
+    <h3>نمونه‌های تو‌در‌تو</h3>
+    <a href="#/transactions/TX-1001" class="sub" data-route>جزئیات: TX-1001</a>
+    <a href="#/transactions/TX-1004" class="sub" data-route>جزئیات: TX-1004</a>
+  </aside>
+
+  <main class="main">
+    <!-- Dashboard -->
+    <section id="view-dashboard" class="panel">
+      <div class="breadcrumb">خانه / داشبورد</div>
+      <div class="grid grid3">
+        <div class="kpi"><div>کل تراکنش‌ها</div><h2 id="kpi-tx">0</h2></div>
+        <div class="kpi"><div>پول در حساب امن</div><h2 id="kpi-held">0</h2></div>
+        <div class="kpi"><div>مرجوع/اختلاف باز</div><h2 id="kpi-dispute">0</h2></div>
+      </div>
+      <div class="panel">
+        <h3>میانبرها</h3>
+        <div class="grid grid3">
+          <a class="card" href="#/transactions" data-route>مشاهده تراکنش‌ها</a>
+          <a class="card" href="#/kyc" data-route>تکمیل KYC فروشنده</a>
+          <a class="card" href="#/wallet" data-route>گزارش پرداخت</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- Transactions list -->
+    <section id="view-transactions" class="panel hidden">
+      <div class="breadcrumb">خانه / تراکنش‌ها</div>
+      <table class="table" id="tx-table">
+        <thead><tr><th>آیدی</th><th>محصول</th><th>خریدار</th><th>فروشنده</th><th>مبلغ</th><th>وضعیت</th><th>عملیات</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </section>
+
+    <!-- Transaction detail -->
+    <section id="view-tx-detail" class="panel hidden">
+      <div class="breadcrumb">خانه / تراکنش‌ها / جزئیات</div>
+      <div id="tx-detail"></div>
+    </section>
+
+    <!-- Orders -->
+    <section id="view-orders" class="panel hidden">
+      <div class="breadcrumb">خانه / سفارش‌ها</div>
+      <div id="orders-list" class="grid grid2"></div>
+    </section>
+
+    <!-- Shipping -->
+    <section id="view-shipping" class="panel hidden">
+      <div class="breadcrumb">خانه / ارسال‌ها</div>
+      <table class="table" id="ship-table">
+        <thead><tr><th>آیدی سفارش</th><th>شرکت حمل</th><th>کدرهگیری</th><th>تحویل</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </section>
+
+    <!-- Disputes -->
+    <section id="view-disputes" class="panel hidden">
+      <div class="breadcrumb">خانه / اختلافات</div>
+      <div id="disputes"></div>
+    </section>
+
+    <!-- Buyers -->
+    <section id="view-buyers" class="panel hidden">
+      <div class="breadcrumb">خانه / خریداران</div>
+      <div id="buyers" class="grid grid2"></div>
+    </section>
+
+    <!-- Sellers -->
+    <section id="view-sellers" class="panel hidden">
+      <div class="breadcrumb">خانه / فروشندگان</div>
+      <div id="sellers" class="grid grid2"></div>
+    </section>
+
+    <!-- KYC -->
+    <section id="view-kyc" class="panel hidden">
+      <div class="breadcrumb">خانه / KYC</div>
+      <div class="grid grid2">
+        <div class="card">
+          <h3>فرم احراز هویت فروشنده</h3>
+          <label>نام فروشگاه</label>
+          <input class="input" placeholder="مثال: فروشگاه آبی">
+          <label style="margin-top:8px">شناسه ملی</label>
+          <input class="input" placeholder="*********">
+          <label style="margin-top:8px">آدرس</label>
+          <input class="input" placeholder="...">
+          <button class="btn" style="margin-top:10px" onclick="alert('فیک: ارسال شد')">ارسال</button>
+        </div>
+        <div class="card">
+          <h3>راهنمایی</h3>
+          <p class="meta">پس از تایید KYC، تراکنش‌ها با وضعیت <span class="badge s-held">پول در حساب امن</span> قابل آزادسازی خواهند بود.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Wallet -->
+    <section id="view-wallet" class="panel hidden">
+      <div class="breadcrumb">خانه / کیف پول</div>
+      <div class="grid grid3" id="wallet-kpis"></div>
+      <div class="panel">
+        <h3>آخرین تسویه‌ها</h3>
+        <table class="table" id="wallet-table">
+          <thead><tr><th>تاریخ</th><th>مرجع</th><th>مبلغ</th><th>وضعیت</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Settings -->
+    <section id="view-settings" class="panel hidden">
+      <div class="breadcrumb">خانه / تنظیمات</div>
+      <label>فعال‌سازی اعلان مرحله‌ای</label>
+      <select class="input" onchange="alert('فیک: ذخیره شد')">
+        <option>روشن</option><option>خاموش</option>
+      </select>
+      <div class="meta" style="margin-top:8px">اعلان در مراحل: پرداخت، ارسال، تحویل، آزادسازی وجه.</div>
+    </section>
+
+    <div class="footer meta">Single-file demo • GitHub Pages ready</div>
+  </main>
+</div>
+
+<script>
+// --- Fake data ---
+const txs = [
+  {id:'TX-1001', product:'گوشی مدل X', buyer:'علی', seller:'فروشگاه آبی', amount: 8500000, status:'held', created:'2025-09-25', shipped:false},
+  {id:'TX-1002', product:'کتاب آموزشی', buyer:'زهره', seller:'ناشر نوین', amount: 120000, status:'released', created:'2025-09-20', shipped:true},
+  {id:'TX-1003', product:'کفش ورزشی', buyer:'سینا', seller:'SportShop', amount: 950000, status:'pending', created:'2025-09-26', shipped:false},
+  {id:'TX-1004', product:'دوربین عکاسی', buyer:'نگار', seller:'Camera-Store', amount: 42000000, status:'held', created:'2025-09-24', shipped:true}
+];
+const orders = [
+  {orderId:'ORD-7001', tx:'TX-1001', address:'تهران، ...', note:'ارسال سریع', items:['گوشی مدل X','گلس']},
+  {orderId:'ORD-7002', tx:'TX-1003', address:'اصفهان، ...', note:'تماس قبل از ارسال', items:['کفش ورزشی']}
+];
+const shipments = [
+  {orderId:'ORD-7001', carrier:'تیپاکس', tracking:'TPX123456', delivered:false},
+  {orderId:'ORD-7002', carrier:'پست', tracking:'PST987321', delivered:true}
+];
+const disputes = [
+  {tx:'TX-1003', type:'عدم تطابق کالا', msg:'رنگ متفاوت است', status:'باز'},
+];
+const buyers = [
+  {name:'علی', rating:4.8, txCount:5},
+  {name:'زهره', rating:4.5, txCount:3},
+  {name:'سینا', rating:4.1, txCount:2}
+];
+const sellers = [
+  {name:'فروشگاه آبی', rating:4.7, kyc:true},
+  {name:'ناشر نوین', rating:4.3, kyc:true},
+  {name:'SportShop', rating:3.9, kyc:false},
+  {name:'Camera-Store', rating:4.6, kyc:true}
+];
+const payouts = [
+  {date:'2025-09-26', ref:'PAYOUT-2201', amount: 42000000, status:'پرداخت شد'},
+  {date:'2025-09-21', ref:'PAYOUT-2195', amount: 120000, status:'پرداخت شد'},
+];
+
+// --- Helpers ---
+const $ = sel => document.querySelector(sel);
+const $$ = sel => document.querySelectorAll(sel);
+const fmt = n => n.toLocaleString('fa-IR');
+
+// status badge
+function sBadge(s){
+  if(s==='pending') return `<span class="badge s-pending">در انتظار پرداخت</span>`;
+  if(s==='held') return `<span class="badge s-held">پول در حساب امن</span>`;
+  if(s==='released') return `<span class="badge s-released">آزاد شده</span>`;
+  return s;
+}
+
+// fill dashboard KPIs
+function fillDashboard(){
+  $('#kpi-tx').textContent = txs.length;
+  $('#kpi-held').textContent = txs.filter(t=>t.status==='held').length;
+  $('#kpi-dispute').textContent = disputes.length;
+}
+
+// transactions table
+function renderTxTable(){
+  const tbody = $('#tx-table tbody'); tbody.innerHTML='';
+  txs.forEach(t=>{
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td><a href="#/transactions/${t.id}" data-route>${t.id}</a></td>
+      <td>${t.product}</td>
+      <td>${t.buyer}</td>
+      <td>${t.seller}</td>
+      <td>${fmt(t.amount)} تومان</td>
+      <td>${sBadge(t.status)}</td>
+      <td>
+        <button class="btn alt" onclick="fakeAdvance('${t.id}')">پیشبرد مرحله</button>
+      </td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+// tx detail
+function renderTxDetail(id){
+  const t = txs.find(x=>x.id===id);
+  if(!t){ $('#tx-detail').innerHTML='یافت نشد'; return; }
+  $('#tx-detail').innerHTML = `
+    <div class="grid grid2">
+      <div class="card">
+        <h3>اطلاعات تراکنش</h3>
+        <p>آیدی: <strong>${t.id}</strong></p>
+        <p>محصول: ${t.product}</p>
+        <p>خریدار: ${t.buyer} | فروشنده: ${t.seller}</p>
+        <p>مبلغ: ${fmt(t.amount)} تومان</p>
+        <p>وضعیت: ${sBadge(t.status)}</p>
+        <div class="grid">
+          <button class="btn" onclick="fakeAdvance('${t.id}')">پیشبرد مرحله</button>
+          <button class="btn alt" onclick="alert('فیک: باز کردن اختلاف')">باز کردن اختلاف</button>
+        </div>
+      </div>
+      <div class="card">
+        <h3>خط زمانی</h3>
+        <ol>
+          <li>ثبت سفارش ← ایجاد Escrow</li>
+          <li>پرداخت خریدار ← حالت <span class="badge s-held">Held</span></li>
+          <li>ارسال فروشنده ← رهگیری</li>
+          <li>تحویل و تایید ← <span class="badge s-released">Release</span></li>
+        </ol>
+      </div>
+    </div>`;
+}
+
+// orders
+function renderOrders(){
+  const c = $('#orders-list'); c.innerHTML='';
+  orders.forEach(o=>{
+    const t = txs.find(x=>x.id===o.tx);
+    const div = document.createElement('div');
+    div.className='card';
+    div.innerHTML = `
+      <h3>${o.orderId}</h3>
+      <p>مرتبط با تراکنش: <a href="#/transactions/${o.tx}" data-route>${o.tx}</a></p>
+      <p>آدرس: ${o.address}</p>
+      <p>اقلام: ${o.items.join('، ')}</p>
+      <p>یادداشت: ${o.note}</p>
+      <button class="btn" onclick="alert('فیک: برچسب پستی چاپ شد')">چاپ برچسب</button>`;
+    c.appendChild(div);
+  });
+}
+
+// shipping
+function renderShipping(){
+  const tb = $('#ship-table tbody'); tb.innerHTML='';
+  shipments.forEach(s=>{
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${s.orderId}</td><td>${s.carrier}</td><td>${s.tracking}</td><td>${s.delivered?'بله':'خیر'}</td>`;
+    tb.appendChild(tr);
+  });
+}
+
+// disputes
+function renderDisputes(){
+  const d = $('#disputes'); d.innerHTML='';
+  if(!disputes.length){ d.innerHTML='<div class="meta">اختلافی وجود ندارد.</div>'; return; }
+  disputes.forEach(i=>{
+    const card = document.createElement('div'); card.className='card';
+    card.innerHTML = `<strong>${i.tx}</strong> — ${i.type}<br><span class="meta">${i.msg}</span>
+    <div style="margin-top:8px"><button class="btn alt" onclick="alert('فیک: شروع داوری')">شروع داوری</button></div>`;
+    d.appendChild(card);
+  });
+}
+
+// buyers/sellers
+function renderPeople(list, elId, kind){
+  const el = $(elId); el.innerHTML='';
+  list.forEach(p=>{
+    const c = document.createElement('div'); c.className='card';
+    c.innerHTML = `<h3>${p.name}</h3>
+      <p>امتیاز: ${p.rating}</p>
+      ${kind==='buyer'?`<p>تعداد تراکنش: ${p.txCount}</p>`:`<p>KYC: ${p.kyc?'تایید':'نامشخص'}</p>`}
+      <button class="btn" onclick="alert('فیک: ارسال پیام به ${p.name}')">پیام</button>`;
+    el.appendChild(c);
+  });
+}
+
+// wallet
+function renderWallet(){
+  const k = $('#wallet-kpis'); k.innerHTML='';
+  const total = txs.reduce((s,t)=>s+(t.status==='released'?t.amount:0),0);
+  const held = txs.reduce((s,t)=>s+(t.status==='held'?t.amount:0),0);
+  const cards = [
+    {t:'آزاد شده امروز', v: fmt(total)+' تومان'},
+    {t:'در حساب امن', v: fmt(held)+' تومان'},
+    {t:'تعداد پرداخت‌ها', v: fmt(payouts.length)}
+  ];
+  cards.forEach(x=>{
+    const d=document.createElement('div'); d.className='kpi'; d.innerHTML=`<div>${x.t}</div><h2>${x.v}</h2>`;
+    k.appendChild(d);
+  });
+  const tb = $('#wallet-table tbody'); tb.innerHTML='';
+  payouts.forEach(p=>{
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td>${p.date}</td><td>${p.ref}</td><td>${fmt(p.amount)} تومان</td><td>${p.status}</td>`;
+    tb.appendChild(tr);
+  });
+}
+
+// advance status (fake)
+function fakeAdvance(id){
+  const t = txs.find(x=>x.id===id); if(!t) return;
+  if(t.status==='pending') t.status='held';
+  else if(t.status==='held') t.status='released';
+  else t.status='released';
+  renderTxTable(); renderTxDetail(id); fillDashboard(); renderWallet();
+}
+
+// --- Router ---
+const views = {
+  '/dashboard':'#view-dashboard',
+  '/transactions':'#view-transactions',
+  '/orders':'#view-orders',
+  '/shipping':'#view-shipping',
+  '/disputes':'#view-disputes',
+  '/buyers':'#view-buyers',
+  '/sellers':'#view-sellers',
+  '/kyc':'#view-kyc',
+  '/wallet':'#view-wallet',
+  '/settings':'#view-settings'
+};
+
+function show(path){
+  // hide all
+  Object.values(views).forEach(id=>$(id).classList.add('hidden'));
+  // nav active
+  $$('#nav a[data-route]').forEach(a=>a.classList.remove('active'));
+  const link = Array.from($$('#nav a[data-route]')).find(a=>a.getAttribute('href')===`#${path}`);
+  if(link) link.classList.add('active');
+
+  // nested tx detail
+  if(path.startsWith('/transactions/') && path.split('/').length===3){
+    const id = path.split('/')[2];
+    $('#view-tx-detail').classList.remove('hidden');
+    renderTxDetail(id);
+    return;
+  }
+
+  const id = views[path] || '#view-dashboard';
+  $(id).classList.remove('hidden');
+
+  // render per view
+  if(id==='#view-dashboard') fillDashboard();
+  if(id==='#view-transactions') renderTxTable();
+  if(id==='#view-orders') renderOrders();
+  if(id==='#view-shipping') renderShipping();
+  if(id==='#view-disputes') renderDisputes();
+  if(id==='#view-buyers') renderPeople(buyers,'#buyers','buyer');
+  if(id==='#view-sellers') renderPeople(sellers,'#sellers','seller');
+  if(id==='#view-wallet') renderWallet();
+}
+
+function router(){
+  const hash = location.hash || '#/dashboard';
+  show(hash.slice(1));
+}
+
+window.addEventListener('hashchange', router);
+window.addEventListener('load', ()=>{
+  // initial renders for lists used by multiple routes
+  renderTxTable(); renderOrders(); renderShipping(); renderDisputes();
+  renderPeople(buyers,'#buyers','buyer'); renderPeople(sellers,'#sellers','seller');
+  renderWallet(); fillDashboard(); router();
+});
+</script>
+</body>
+</html>
